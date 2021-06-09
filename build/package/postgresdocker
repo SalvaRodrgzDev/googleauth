@@ -1,0 +1,3 @@
+FROM postgres:9.6.22-alpine
+ENV POSTGRES_PASSWORD prueba
+ENV POSTGRES_DB hackernews
