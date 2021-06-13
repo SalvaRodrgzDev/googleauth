@@ -1,9 +1,7 @@
 package database
 
 import (
-	"fmt"
-	"log"
-	"os"
+	"time"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -12,15 +10,18 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
-func InitDB() {
+func Connection() (db *gorm.DB) {
 	dsn := "host=localhost user=postgres password=prueba dbname=hackernews port=5432 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connection to database: %v\n", err)
-		os.Exit(1)
+		panic(err)
 	}
+
+	sqlDB, err := db.DB()
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+	return db
 }
 
 func Migrate() {
@@ -29,10 +30,10 @@ func Migrate() {
 		"postgres://postgres:prueba@localhost:5432/hackernews?sslmode=disable")
 
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatal(err)
+		panic(err)
 	}
 
 }

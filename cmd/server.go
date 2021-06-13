@@ -23,7 +23,6 @@ func main() {
 
 	router := chi.NewRouter()
 
-	database.InitDB()
 	database.Migrate()
 	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))

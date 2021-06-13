@@ -3,28 +3,27 @@ package links
 import (
 	database "googleauth/internal/pkg/db/migrations/postgres"
 	"googleauth/internal/users"
-	"log"
+	"strconv"
 )
 
 type Link struct {
 	ID      string
 	Title   string
 	Address string
-	User    *users.User
+	User    users.User
 }
 
 func (link Link) Save() int64 {
 
-	id := 0
-	err := database.Conn.QueryRow(
-		"INSERT INTO Links(Title,Address) VALUES($1,$2) RETURNING id",
-		link.Title,
-		link.Address,
-	).Scan(&id)
+	newLink := Link{Title: link.Title, Address: link.Address}
 
-	if err != nil {
-		log.Fatal(err)
+	result := database.Connection().Create(&newLink)
+
+	if result.Error != nil {
+		panic(result.Error)
 	}
+
+	id, _ := strconv.ParseInt(newLink.ID, 10, 64)
 
 	return id
 }
